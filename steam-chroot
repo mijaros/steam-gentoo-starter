@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Modified version of steam-chroot command from gentoo wiki
+# original script can be found here https://wiki.gentoo.org/wiki/Steam#Chroot
+# This version is extended with two main tweaks:
+# * It mounts dbus, tmp and exports XDG_RUNTIME_DIR to enable sound control via
+#   pulseaudio
+# * It adds --mount option just to chroot into the environment with root to perform
+#   pacgake maintenance and upgrades if necessary
+
+runtime=
+
+arg=$1
+
+if [ ${arg:-nop} = "--mount" ]; then
+    runtime=true
+fi
+
+# steam chroot bits
+chroot_bits="64"
+
+# steam chroot directory
+chroot_dir="/usr/local/steam64"
+
+# check if chroot bits is valid
+if [ "${chroot_bits}" = "32" ] ; then
+  chroot_arch="linux32"
+elif [ "${chroot_bits}" = "64" ] ; then
+  chroot_arch="linux64"
+else
+  printf "Invalid chroot bits value '%s'. Permitted values are '32' and '64'.\n" "${chroot_bits}"
+  exit 1
+fi
+
+# check if the chroot directory exists
+if [ ! -d "${chroot_dir}" ] ; then
+  printf "The chroot directory '%s' does not exist!\n" "${chroot_dir}"
+  exit 1
+fi
+
+# mount the chroot directories
+mount -v -t proc /proc "${chroot_dir}/proc"
+mount -vR /sys "${chroot_dir}/sys"
+mount -vR /dev "${chroot_dir}/dev"
+mount -vR /run "${chroot_dir}/run"
+mount -vR /var/lib/dbus "${chroot_dir}/var/lib/dbus"
+mount -vR /tmp "${chroot_dir}/tmp"
+mount -vR /var/db/repos/gentoo "${chroot_dir}/var/db/repos/gentoo"
+
+# chroot, substitute user, and start steam
+export STEAM_LINUX_RUNTIME_VERBOSE=1
+export XDG_RUNTIME_DIR=/run/user/1000
+if [ -z $runtime ]; then
+    "${chroot_arch}" chroot "${chroot_dir}" su -c 'steam' steam
+else 
+    PS1="(chroot) ${PS1}" "${chroot_arch}" chroot "${chroot_dir}" bash -c 'env-update && source /etc/profile && bash -i'
+fi
+
+# unmount the chroot directories when steam exits
+umount -vl "${chroot_dir}/proc"
+umount -vl "${chroot_dir}/sys"
+umount -vl "${chroot_dir}/dev"
+umount -vl "${chroot_dir}/run"
+umount -vl "${chroot_dir}/tmp"
+umount -vl "${chroot_dir}/var/lib/dbus"
+umount -vl "${chroot_dir}/var/db/repos/gentoo"
