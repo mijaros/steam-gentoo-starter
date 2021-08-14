@@ -19,7 +19,7 @@ install: steam steam-chroot
 		install -g root -m 755 steam-chroot -t $(TARGET_DIR)
 
 uninstall:
-		rm -f /usr/local/bin/steam
-		rm -f /usr/local/bin/steam-chroot
+		rm -f $(TARGET_DIR)/steam
+		rm -f $(TARGET_DIR)/steam-chroot
 
 .PHONY: all clean uninstall install
