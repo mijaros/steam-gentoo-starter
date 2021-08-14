@@ -6,7 +6,7 @@
 # * It mounts dbus, tmp and exports XDG_RUNTIME_DIR to enable sound control via
 #   pulseaudio
 # * It adds --mount option just to chroot into the environment with root to perform
-#   pacgake maintenance and upgrades if necessary
+#   package maintenance and upgrades if necessary
 
 runtime=
 
