@@ -51,7 +51,7 @@ mount -vR /var/db/repos/gentoo "${chroot_dir}/var/db/repos/gentoo"
 export STEAM_LINUX_RUNTIME_VERBOSE=1
 export XDG_RUNTIME_DIR=/run/user/1000
 if [ -z $runtime ]; then
-    "${chroot_arch}" chroot "${chroot_dir}" su -c 'steam' steam
+    "${chroot_arch}" chroot "${chroot_dir}" su -c "steam $*" steam
 else 
     PS1="(chroot) ${PS1}" "${chroot_arch}" chroot "${chroot_dir}" bash -c 'env-update && source /etc/profile && bash -i'
 fi
